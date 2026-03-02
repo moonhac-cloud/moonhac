@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MoonHac</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #050508;
+    --bg2: #0a0a10;
+    --bg3: #0d0d16;
+    --card: #0e0e18;
+    --card-border: rgba(56, 139, 255, 0.1);
+    --blue-1: #3b82f6;
+    --blue-2: #60a5fa;
+    --blue-3: #93c5fd;
+    --blue-soft: rgba(59, 130, 246, 0.08);
+    --text: #e8eaf0;
+    --text-muted: #6b7280;
+    --text-dim: #374151;
+    --radius: 16px;
+    --transition: 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Subtle background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(59,130,246,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,130,246,0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Ambient glow top */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(59,130,246,0.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 64px;
+    background: rgba(5,5,8,0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(56,139,255,0.08);
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+    z-index: 100;
+    gap: 40px;
+  }
+
+  .logo {
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 1.35rem;
+    letter-spacing: -0.02em;
+    background: linear-gradient(120deg, #60a5fa, #bfdbfe, #93c5fd, #60a5fa);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 4s linear infinite;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .logo svg { flex-shrink: 0; }
+
+  @keyframes shimmer {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color var(--transition), background var(--transition);
+    position: relative;
+    letter-spacing: 0.01em;
+  }
+
+  .nav-btn svg { opacity: 0.6; transition: opacity var(--transition); }
+
+  .nav-btn:hover {
+    color: var(--text);
+    background: rgba(59,130,246,0.06);
+  }
+  .nav-btn:hover svg { opacity: 1; }
+
+  .nav-btn.active {
+    color: var(--blue-2);
+    background: rgba(59,130,246,0.08);
+  }
+  .nav-btn.active svg { opacity: 1; }
+
+  .nav-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 4px; left: 18px; right: 18px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--blue-1), transparent);
+    border-radius: 1px;
+  }
+
+  /* ── PAGES ── */
+  .page {
+    position: absolute;
+    top: 64px; left: 0; right: 0;
+    min-height: calc(100vh - 64px);
+    padding: 60px 40px 80px;
+    z-index: 1;
+    opacity: 0;
+    transform: translateY(16px);
+    pointer-events: none;
+    transition: opacity var(--transition), transform var(--transition);
+  }
+
+  .page.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+
+  .page-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header { margin-bottom: 48px; }
+
+  .page-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.03em;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .page-title svg { color: var(--blue-2); }
+
+  .page-subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 400;
+    line-height: 1.6;
+    max-width: 400px;
+  }
+
+  /* ── CARDS GRID ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+    animation: cardIn var(--transition) both;
+  }
+
+  .card:nth-child(1) { animation-delay: 0.05s; }
+  .card:nth-child(2) { animation-delay: 0.10s; }
+  .card:nth-child(3) { animation-delay: 0.15s; }
+  .card:nth-child(4) { animation-delay: 0.20s; }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card:hover {
+    border-color: rgba(59,130,246,0.25);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(59,130,246,0.08);
+  }
+
+  .card-image {
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    display: block;
+    background: #0a0a14;
+  }
+
+  .card-image-placeholder {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #0d0d1a 0%, #111120 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(59,130,246,0.2);
+  }
+
+  .card-body {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(59,130,246,0.08);
+    border: 1px solid rgba(59,130,246,0.12);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--blue-2);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    width: fit-content;
+  }
+
+  .card-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 10px;
+    letter-spacing: -0.02em;
+  }
+
+  .card-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+    flex: 1;
+    white-space: pre-line;
+  }
+
+  .card-sep {
+    margin: 14px 0;
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .card-loader-note {
+    font-size: 0.75rem;
+    color: #4b5563;
+    line-height: 1.6;
+    white-space: pre-line;
+  }
+
+  .card-actions { margin-top: 18px; }
+
+  .btn-download {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 20px;
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 10px;
+    color: var(--blue-2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition), color var(--transition), transform 0.2s;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-download:hover {
+    background: rgba(59,130,246,0.18);
+    border-color: rgba(59,130,246,0.4);
+    color: var(--blue-3);
+    transform: translateY(-1px);
+  }
+
+  .btn-download:active { transform: translateY(0); }
+
+  /* ── MODAL OVERLAY ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: #0c0c16;
+    border: 1px solid rgba(59,130,246,0.15);
+    border-radius: 22px;
+    width: 90%;
+    max-width: 480px;
+    padding: 36px;
+    position: relative;
+    transform: translateY(24px) scale(0.97);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow: hidden;
+  }
+
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(96,165,250,0.4), transparent);
+  }
+
+  .modal-overlay.open .modal {
+    transform: translateY(0) scale(1);
+  }
+
+  .modal-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.15);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    color: var(--blue-2);
+  }
+
+  .modal-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+
+  .modal-text {
+    font-size: 0.855rem;
+    color: #9ca3af;
+    line-height: 1.75;
+    margin-bottom: 28px;
+  }
+
+  .modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-virustotal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 12px;
+    color: var(--blue-2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background var(--transition), border-color var(--transition), transform 0.2s;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-virustotal:hover {
+    background: rgba(59,130,246,0.18);
+    border-color: rgba(59,130,246,0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition), color var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-close:not(:disabled):hover {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.1);
+    color: var(--text);
+  }
+
+  .btn-close:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .btn-close-timer {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: rgba(59,130,246,0.15);
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--blue-2);
+  }
+
+  /* progress ring on close btn */
+  .close-progress {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .close-progress-bar {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--blue-1), var(--blue-3));
+    border-radius: 1px;
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+
+  /* ── HELP PAGE ── */
+  .help-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .help-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    display: flex;
+    gap: 16px;
+    transition: border-color var(--transition), transform var(--transition);
+    animation: cardIn var(--transition) both;
+  }
+
+  .help-card:nth-child(1) { animation-delay: 0.05s; }
+  .help-card:nth-child(2) { animation-delay: 0.10s; }
+  .help-card:nth-child(3) { animation-delay: 0.15s; }
+
+  .help-card:hover {
+    border-color: rgba(59,130,246,0.2);
+    transform: translateY(-3px);
+  }
+
+  .help-icon {
+    width: 44px; height: 44px;
+    background: rgba(59,130,246,0.08);
+    border: 1px solid rgba(59,130,246,0.12);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--blue-2);
+  }
+
+  .help-card h3 {
+    font-family: 'Sora', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .help-card p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.15); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(59,130,246,0.3); }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <a class="logo" onclick="showPage('cheats')">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3a9 9 0 1 0 0 18A9 9 0 0 0 12 3z"/>
+      <path d="M12 7v5l3 3"/>
+      <path d="M5.6 5.6l.7.7M17.7 5.6l-.7.7M5.6 18.4l.7-.7M17.7 18.4l-.7-.7"/>
+    </svg>
+    MoonHac
+  </a>
+
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showPage('cheats')" id="nav-cheats">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+      Читы
+    </button>
+    <button class="nav-btn" onclick="showPage('help')" id="nav-help">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      Помощь
+    </button>
+  </nav>
+</header>
+
+<!-- PAGE: CHEATS -->
+<main class="page active" id="page-cheats">
+  <div class="page-inner">
+    <div class="page-header">
+      <h1 class="page-title">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        Лучшие клиенты 1.16.5
+      </h1>
+      <p class="page-subtitle">Кряки самых популярных<br>и лучших читов на этот момент</p>
+    </div>
+
+    <div class="cards-grid">
+
+      <!-- Card 1: Wexside -->
+      <div class="card">
+        <img class="card-image" src="wexside.png" alt="Wexside Client"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="card-image-placeholder" style="display:none">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+        </div>
+        <div class="card-body">
+          <div class="card-badge">
+            <svg width="9" height="9" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
+            1.16.5
+          </div>
+          <div class="card-title">Wexside Client</div>
+          <div class="card-desc">Лучший PvP Чит для FunTime
+На данный момент который
+Хорошо обходит АнтиЧит
+И регулярно обновляется</div>
+          <hr class="card-sep">
+          <div class="card-loader-note">Также если клиент обновится
+Наш Loader сам установит обновление
+При следующем запуске</div>
+          <div class="card-actions">
+            <button class="btn-download" onclick="openModal('Wexside Client')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Скачать
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Nursultan -->
+      <div class="card">
+        <img class="card-image" src="nursultan.png" alt="Nursultan Client"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="card-image-placeholder" style="display:none">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+        </div>
+        <div class="card-body">
+          <div class="card-badge">
+            <svg width="9" height="9" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
+            1.16.5
+          </div>
+          <div class="card-title">Nursultan Client</div>
+          <div class="card-desc">Самый стабильный клиент
+Который хорошо обходит
+Античит а также сервера
+FunTime, ReallyWorld
+И регулярно обновляется</div>
+          <hr class="card-sep">
+          <div class="card-loader-note">Также если клиент обновится
+Наш Loader сам установит обновление
+При следующем запуске</div>
+          <div class="card-actions">
+            <button class="btn-download" onclick="openModal('Nursultan Client')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Скачать
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Delta -->
+      <div class="card">
+        <img class="card-image" src="delta.webp" alt="Delta Client"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="card-image-placeholder" style="display:none">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+        </div>
+        <div class="card-body">
+          <div class="card-badge">
+            <svg width="9" height="9" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
+            1.16.5
+          </div>
+          <div class="card-title">Delta Client</div>
+          <div class="card-desc">Лучший PVE клиент
+Для сервера FunTime
+Также обходит Античит
+Сервера FunTime
+И регулярно обновляется</div>
+          <hr class="card-sep">
+          <div class="card-loader-note">Также если клиент обновится
+Наш Loader сам установит обновление
+При следующем запуске</div>
+          <div class="card-actions">
+            <button class="btn-download" onclick="openModal('Delta Client')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Скачать
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4: Catlavan -->
+      <div class="card">
+        <img class="card-image" src="catlavan.png" alt="Catlavan Client"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="card-image-placeholder" style="display:none">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+        </div>
+        <div class="card-body">
+          <div class="card-badge">
+            <svg width="9" height="9" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
+            1.16.5
+          </div>
+          <div class="card-title">Catlavan Client</div>
+          <div class="card-desc">Самый лучший клиент
+Для сервера ReallyWorld
+Который лучше всех
+Обходит Античит
+И регулярно обновляется</div>
+          <hr class="card-sep">
+          <div class="card-loader-note">Также если клиент обновится
+Наш Loader сам установит обновление
+При следующем запуске</div>
+          <div class="card-actions">
+            <button class="btn-download" onclick="openModal('Catlavan Client')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Скачать
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- PAGE: HELP -->
+<main class="page" id="page-help">
+  <div class="page-inner">
+    <div class="page-header">
+      <h1 class="page-title">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        Помощь
+      </h1>
+      <p class="page-subtitle">Ответы на часто задаваемые вопросы<br>и помощь с установкой</p>
+    </div>
+
+    <div class="help-grid">
+      <div class="help-card">
+        <div class="help-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Как установить Loader?</h3>
+          <p>Скачайте moon-loader.exe с нашего сайта и запустите от имени администратора. Выберите нужный клиент из списка — лаунчер установит всё автоматически.</p>
+        </div>
+      </div>
+
+      <div class="help-card">
+        <div class="help-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Это безопасно?</h3>
+          <p>Все клиенты проверены и не содержат вредоносного ПО. Проверить сам лаунчер на VirusTotal можно прямо из окна загрузки перед установкой.</p>
+        </div>
+      </div>
+
+      <div class="help-card">
+        <div class="help-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Обновления</h3>
+          <p>Loader проверяет обновления при каждом запуске. Если вышла новая версия клиента — она установится автоматически без вашего участия.</p>
+        </div>
+      </div>
+
+      <div class="help-card">
+        <div class="help-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Почему нет прямого файла?</h3>
+          <p>Без лаунчера клиент обнаружит отсутствие подписки. лаунчер делает патч, имитирующий подписку отпровляя ненастоящие запросы на сервер клиента — это даёт доступ к актуальной версии клиента.</p>
+        </div>
+      </div>
+
+      <div class="help-card">
+        <div class="help-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Не запускается клиент</h3>
+          <p>Отключите антивирус - любой антивирус в том числе и Windows Defender, блокируют установку файлов клиента с нашего сервера считая за неизвестный, скачивание с сервера позволяет запускать клиент без подписки</p>
+        </div>
+      </div>
+
+      <div class="help-card">
+        <div class="help-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Требования</h3>
+          <p>Windows 10/11, Minecraft Java Edition 1.16.5. Всегда запускайте лаунчер от имени администратора для корректной работы патча. Перед запуском отключите антивирус или добавьте moon-loader.exe в исключения.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+    </div>
+    <div class="modal-title" id="modal-title">Wexside Client</div>
+    <div class="modal-text">
+      Почему скачивается Loader, а не файл клиента? Если бы вы могли скачать клиент и запустить его напрямую через версию в вашем Майнкрафте — клиент бы обнаружил, что вы играете без подписки. В то время как наш Loader делает патч с имитацией того, что у вас есть подписка, из-за чего вы можете играть с последней и актуальной версией клиента.
+    </div>
+    <div class="modal-actions">
+      <a href="https://https://www.virustotal.com/gui/file/fa565772e049244570bbce8b234ea882cffa3df68a889d7d730664b6d0072e27?nocache=1 target="_blank" class="btn-virustotal">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        Проверить Loader на VirusTotal
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/>
+          <line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+      </a>
+      <button class="btn-close" id="btn-close" onclick="closeModal()" disabled>
+        <div class="close-progress"><div class="close-progress-bar" id="close-progress-bar"></div></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        Закрыть
+        <span class="btn-close-timer" id="close-timer">5</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── PAGE SWITCHING ──
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    document.getElementById('nav-' + name).classList.add('active');
+
+    // Re-trigger card animations
+    document.querySelectorAll('#page-' + name + ' .card, #page-' + name + ' .help-card').forEach((c, i) => {
+      c.style.animation = 'none';
+      c.offsetHeight;
+      c.style.animation = '';
+      c.style.animationDelay = (0.05 + i * 0.05) + 's';
+    });
+  }
+
+  // ── MODAL ──
+  let timerInterval = null;
+
+  function openModal(clientName) {
+    // Trigger download
+    const a = document.createElement('a');
+    a.href = 'moon-loader.exe';
+    a.download = 'moon-loader.exe';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    document.getElementById('modal-title').textContent = clientName;
+    document.getElementById('modal-overlay').classList.add('open');
+
+    // Reset close button
+    const btn = document.getElementById('btn-close');
+    const timer = document.getElementById('close-timer');
+    const bar = document.getElementById('close-progress-bar');
+    btn.disabled = true;
+    timer.style.display = 'inline-flex';
+    bar.style.width = '0%';
+
+    let seconds = 5;
+    timer.textContent = seconds;
+
+    if (timerInterval) clearInterval(timerInterval);
+
+    let elapsed = 0;
+    timerInterval = setInterval(() => {
+      elapsed += 100;
+      const pct = (elapsed / 5000) * 100;
+      bar.style.width = Math.min(pct, 100) + '%';
+
+      if (elapsed % 1000 === 0) {
+        seconds--;
+        timer.textContent = seconds;
+        if (seconds <= 0) {
+          clearInterval(timerInterval);
+          btn.disabled = false;
+          timer.style.display = 'none';
+        }
+      }
+    }, 100);
+  }
+
+  function closeModal() {
+    if (document.getElementById('btn-close').disabled) return;
+    document.getElementById('modal-overlay').classList.remove('open');
+    if (timerInterval) clearInterval(timerInterval);
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modal-overlay')) {
+      // Only close if button is enabled
+      if (!document.getElementById('btn-close').disabled) closeModal();
+    }
+  }
+</script>
+</body>
+</html>
